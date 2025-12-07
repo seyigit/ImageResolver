@@ -5,3 +5,8 @@ __pycache__/
 .venv/
 venv/
 .DS_Store
+# Large model files - download from MODEL_URL
+checkpoints/*.h5
+checkpoints/*.keras
+*.h5
+*.keras

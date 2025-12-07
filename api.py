@@ -1,6 +1,8 @@
 # api.py
 import io
 import json
+import os
+import urllib.request
 from typing import Dict
 
 import numpy as np
@@ -14,12 +16,40 @@ from pathlib import Path
 tf.config.threading.set_intra_op_parallelism_threads(2)
 tf.config.threading.set_inter_op_parallelism_threads(2)
 
+MODEL_URL = os.environ.get("MODEL_URL", "")
+MODEL_PATH = Path("checkpoints/model.h5")
+
+def download_model_if_needed():
+    """Model dosyasını URL'den indir (eğer yoksa)"""
+    if MODEL_PATH.exists():
+        print(f"Model zaten mevcut: {MODEL_PATH}")
+        return
+    
+    if not MODEL_URL:
+        # Local checkpoints'e bak
+        ckpts = sorted(Path("checkpoints").glob("*.h5"))
+        if ckpts:
+            return  # Local checkpoint var, indirmeye gerek yok
+        raise ValueError("MODEL_URL environment variable gerekli veya checkpoints/ klasöründe .h5 dosyası olmalı!")
+    
+    print(f"Model indiriliyor: {MODEL_URL}")
+    MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
+    urllib.request.urlretrieve(MODEL_URL, MODEL_PATH)
+    print(f"Model indirildi: {MODEL_PATH}")
+
 def load_latest_checkpoint():
-    ckpts = sorted(Path("checkpoints").glob("*.h5"))
-    if not ckpts:
-        raise FileNotFoundError("checkpoints/ klasöründe .h5 dosyası bulunamadı!")
-    print("Loaded checkpoint:", ckpts[-1])
-    model = keras.models.load_model(ckpts[-1])
+    download_model_if_needed()
+    
+    if MODEL_PATH.exists():
+        ckpt = MODEL_PATH
+    else:
+        ckpts = sorted(Path("checkpoints").glob("*.h5"))
+        if not ckpts:
+            raise FileNotFoundError("checkpoints/ klasöründe .h5 dosyası bulunamadı!")
+        ckpt = ckpts[-1]
+    
+    print("Loaded checkpoint:", ckpt)
+    model = keras.models.load_model(ckpt)
     
     # İlk predict'i başlangıçta yap (warmup)
     dummy_input = np.zeros((1, 60, 150, 1), dtype=np.float32)
