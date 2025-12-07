@@ -17,12 +17,9 @@ tf.config.threading.set_inter_op_parallelism_threads(2)
 def load_latest_checkpoint():
     ckpts = sorted(Path("checkpoints").glob("*.h5"))
     if not ckpts:
-        # Eğer checkpoint yoksa eski modeli yükle
-        print("Checkpoint yok → ocr6_model.keras yükleniyor.")
-        model = keras.models.load_model("ocr6_model.keras")
-    else:
-        print("Loaded checkpoint:", ckpts[-1])
-        model = keras.models.load_model(ckpts[-1])
+        raise FileNotFoundError("checkpoints/ klasöründe .h5 dosyası bulunamadı!")
+    print("Loaded checkpoint:", ckpts[-1])
+    model = keras.models.load_model(ckpts[-1])
     
     # İlk predict'i başlangıçta yap (warmup)
     dummy_input = np.zeros((1, 60, 150, 1), dtype=np.float32)
