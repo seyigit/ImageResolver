@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: imageresolver-api
+    runtime: python
+    region: frankfurt
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn api:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.6"
+      - key: TF_CPP_MIN_LOG_LEVEL
+        value: "2"
+    healthCheckPath: /docs

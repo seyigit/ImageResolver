@@ -1,0 +1,7 @@
+{
+  "alphabet": "23456789ABCDEFGHJKLMNPQRSTUVWXYZ",
+  "captcha_len": 6,
+  "img_height": 60,
+  "img_width": 150,
+  "channels": 1
+}
